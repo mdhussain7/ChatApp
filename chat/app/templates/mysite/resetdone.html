@@ -1,0 +1,68 @@
+{% extends 'mysite/base.html' %}
+{% block title%} Forgot your password {% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .asteriskField {
+      display: none;
+    }
+
+    form .alert ul li {
+      list-style: none;
+    }
+
+    form .alert ul {
+      padding: 0;
+      margin: 0;
+    }
+    footer {
+    background-color: green;
+    color: white;
+    font-size: 18px;
+  <!--  border-bottom: 3px solid var(&#45;&#45;back);-->
+    }
+    body {
+      font-family: Lato, sans-serif;
+    }
+
+    /* Navbar Styles */
+
+    nav {
+      background-color: white;
+      font-weight: light;
+      display: flex;
+      justify-content: space-around;
+
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0.4, 0, 0.2);
+    }
+     .head1 {
+             font-size:50px;
+             color:white;
+             font-weight:bold;
+             text-align:center;
+            }
+     .head2 {
+             font-size:20px;
+             text-align:center;
+             margin-bottom:20px;
+            }
+</style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" id="user">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'chat:home' %}"> <strong> Chat Application </strong></a>
+    </div>
+</nav>
+    <center>
+         <div class = "head1"> Thanks for your password updated </div>
+        <br>
+        <h3>click here for login now <a href="{% url 'mysite:log_in' %}"> login</a></h3>
+    </center>
+{% endblock %}
