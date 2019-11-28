@@ -1,0 +1,222 @@
+{% extends 'mysite/base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .asteriskField {
+      display: none;
+    }
+
+    form .alert ul li {
+      list-style: none;
+    }
+
+    form .alert ul {
+      padding: 0;
+      margin: 0;
+    }
+    footer {
+    background-color: green;
+    color: white;
+    font-size: 18px;
+  <!--  border-bottom: 3px solid var(&#45;&#45;back);-->
+    }
+    body {
+      font-family: Lato, sans-serif;
+    }
+
+    /* Navbar Styles */
+
+    nav {
+      background-color: white;
+      font-weight: light;
+      display: flex;
+      justify-content: space-around;
+
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0.4, 0, 0.2);
+    }
+
+    #chat-log{
+        font-weight: light;
+        display: flex;
+        float: right;
+        position:relative;
+        left:-1px;
+        top:-12px;
+
+    }
+    #chat-message-input{
+            font-weight: light;
+            display: flex;
+            float: right;
+            position:relative;
+            left:422px;
+            top:182px;
+        }
+    #chat-message-submit{
+            font-weight: light;
+            display: flex;
+            float: right;
+            position:relative;
+            left:200px;
+            top:170px;
+        }
+     #user {
+	font-weight: 500;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	text-align: right;
+  }
+    .logout
+    {
+        float: right;
+    }
+    .usrlst{
+            font-weight: light;
+            display: flex;
+            float: right;
+            position:relative;
+            right:526px;
+            bottom:180px;
+        }
+     .grpusr{
+            font-weight: light;
+            display: flex;
+            float: right;
+            position:relative;
+            right:580px;
+            bottom:180px;
+        }
+</style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4" id="user">
+        <div class="container">
+          <a class="navbar-brand" href="{% url 'chat:home' %}"> <strong> Chat Application </strong></a>
+          <div class="logout">
+              <a class="navbar-brand" href="{% url 'mysite:log_out' %}"><p style="text-align: right;float:right;font-weight: 500;font-size: 15px;">Log out</p></a>
+          </div>
+        </div>
+    </nav>
+
+    <div>
+        <textarea id="chat-log" cols="50" rows="10" disabled="disabled" style="background-color:black;color:white;"></textarea><br/>
+        <input id="chat-message-input" type="text" size="50" style="background-color:white;"/><br><br>
+        <input id="chat-message-submit" type="button" value="Send"/>
+    </div>
+
+    <div>
+    <table border="3" id="grpusr">
+    <tbody>
+    <tr>
+        <td>
+            <span style="float: right;color: blue;text-transform: uppercase;font-weight: 500;font-size: 20px;">
+                 Group Name
+            </span>
+        </td>
+
+        <td>
+            <span style="float: right;color: blue;text-transform: uppercase;font-weight: 500;font-size: 20px;">
+               Current User
+            </span>
+        </td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <br>
+        <td style="text-transform: uppercase;font-weight: 500;font-size: 12px;">
+             {{ room_name_json }}
+        </td>
+        <td>
+            {{ username }}
+        </td>
+    </tr>
+    </tbody>
+    </table>
+
+
+    <table border="3" class="usrlst">
+    <tbody>
+    <tr>
+        <td>
+            <span style="text-transform: uppercase;">
+                User Name
+            </span>
+        </td>
+
+        <td>
+            <span style="text-transform: uppercase;">
+               Status
+            </span>
+        </td>
+    </tr>
+    <tr></tr>
+    {% for user in users %}
+    {% if user.status == 'Online' %}
+    <tr>
+        <br>
+        <td style="text-transform: uppercase;font-weight: 500;font-size: 12px;">
+            {{ user.username|escape }}
+        </td>
+        <td style="color:green">
+            {{ user.status|default:'Offline' }}
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+</body>
+</html>
+<script>
+    var roomName = '{{ room_name_json }}';
+    var user= '{{username}}';
+    var messages ={{ message }};
+    var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+
+    chatSocket.onopen=function(){
+        for (i=0;i<messages.length;i++){
+            var m =messages[i].message;
+            document.querySelector('#chat-log').value += (m+ '\n');
+        }
+    };
+
+
+    chatSocket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        document.querySelector('#chat-log').value += (message + '\n');
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        var messageInputDom = document.querySelector('#chat-message-input');
+        var message = messageInputDom.value;
+
+        message = '['+user + ']: ' + message
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'command':'fetch_messages'
+        }));
+
+        messageInputDom.value = '';
+    };
+</script>
+{% endblock content %}
